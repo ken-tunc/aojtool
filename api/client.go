@@ -2,7 +2,10 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"encoding/gob"
+	"encoding/json"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/http/cookiejar"
@@ -51,6 +54,53 @@ func NewClient() (*Client, error) {
 	}
 
 	return client, nil
+}
+
+func (c *Client) newRequest(ctx context.Context, method, path string, payload interface{}) (*http.Request, error) {
+	ref := &url.URL{Path: path}
+	u := c.Endpoint.ResolveReference(ref)
+
+	var buf io.ReadWriter
+	if payload != nil {
+		buf = new(bytes.Buffer)
+		err := json.NewEncoder(buf).Encode(payload)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	req, err := http.NewRequest(method, u.String(), buf)
+	if err != nil {
+		return nil, err
+	}
+
+	req.WithContext(ctx)
+
+	if payload != nil {
+		req.Header.Set("Content-Type", "application/json")
+	}
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("User-Agent", c.UserAgent)
+
+	return req, nil
+}
+
+func (c *Client) do(req *http.Request, v interface{}) (*http.Response, error) {
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if v == nil {
+		return resp, nil
+	}
+
+	err = json.NewDecoder(resp.Body).Decode(v)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
 }
 
 func (c *Client) Cookies() []*http.Cookie {
