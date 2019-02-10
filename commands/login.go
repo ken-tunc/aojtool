@@ -39,6 +39,7 @@ var loginCmd = &cobra.Command{
 
 		cmd.Print("password: ")
 		bytePassword, err := terminal.ReadPassword(int(syscall.Stdin))
+		cmd.Println()
 		if err != nil {
 			abort(err)
 		}

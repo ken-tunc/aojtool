@@ -25,7 +25,7 @@ func (auth AuthService) Login(ctx context.Context, id, password string) (*models
 	var user models.User
 	resp, err := auth.client.do(req, &user)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("login failed")
 	}
 	if resp.StatusCode != 200 {
 		return nil, fmt.Errorf("login failed, status code: %s", resp.Status)

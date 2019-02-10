@@ -127,6 +127,7 @@ func (c *Client) SaveCookies() error {
 	if err != nil {
 		return err
 	}
+	defer file.Close()
 
 	_, err = file.Write(buf.Bytes())
 	if err != nil {
