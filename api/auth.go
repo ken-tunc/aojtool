@@ -39,6 +39,29 @@ func (auth AuthService) Login(ctx context.Context, id, password string) (*models
 	return &user, nil
 }
 
+func (auth AuthService) Logout(ctx context.Context) error {
+	req, err := auth.client.newRequest(ctx, "DELETE", "/session", nil)
+	if err != nil {
+		return err
+	}
+
+	resp, err := auth.client.do(req, nil)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != 204 {
+		return fmt.Errorf("logout failed, status code: %s", resp.Status)
+	}
+
+	err = auth.client.RemoveCookies()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (auth AuthService) IsLoggedIn(ctx context.Context) (bool, error) {
 	req, err := auth.client.newRequest(ctx, "GET", "/self", nil)
 	if err != nil {
