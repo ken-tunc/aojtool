@@ -3,7 +3,6 @@ package api
 import (
 	"bytes"
 	"context"
-	"encoding/gob"
 	"encoding/json"
 	"io"
 	"io/ioutil"
@@ -17,8 +16,9 @@ import (
 	"github.com/ken-tunc/aojtool/util"
 )
 
-var (
-	cachePath = filepath.Join(util.HomeDir(), ".cache", "aojtool", "cookies")
+var cachePath = filepath.Join(util.CacheDir, "cookies")
+
+const (
 	endpoint  = "https://judgeapi.u-aizu.ac.jp"
 	userAgent = "aotjool"
 )
@@ -117,19 +117,17 @@ func (c *Client) SaveCookies() error {
 		return err
 	}
 
-	buf := new(bytes.Buffer)
-	err = gob.NewEncoder(buf).Encode(c.Cookies())
-	if err != nil {
-		return err
-	}
-
 	file, err := os.Create(path)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	_, err = file.Write(buf.Bytes())
+	byteCookies, err := util.Serialize(c.Cookies())
+	if err != nil {
+		return err
+	}
+	_, err = file.Write(byteCookies)
 	if err != nil {
 		return err
 	}
@@ -190,8 +188,7 @@ func loadCookies() ([]*http.Cookie, error) {
 		return nil, err
 	}
 
-	buf := bytes.NewBuffer(data)
-	if err = gob.NewDecoder(buf).Decode(&cookies); err != nil {
+	if err = util.Deserialize(data, &cookies); err != nil {
 		return nil, err
 	}
 

@@ -8,6 +8,8 @@ import (
 	"github.com/mitchellh/go-homedir"
 )
 
+var CacheDir = filepath.Join(HomeDir(), ".cache", "aojtool")
+
 func Exists(path string) (bool, error) {
 	_, err := os.Stat(path)
 	if err == nil {
