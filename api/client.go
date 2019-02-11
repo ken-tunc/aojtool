@@ -32,6 +32,7 @@ type Client struct {
 
 	Auth   *AuthService
 	Submit *SubmitService
+	Status *StatusService
 }
 
 func NewClient() (*Client, error) {
@@ -58,6 +59,7 @@ func NewClient() (*Client, error) {
 
 	client.Auth = &AuthService{client: client}
 	client.Submit = &SubmitService{Client: client}
+	client.Status = &StatusService{Client: client}
 
 	return client, nil
 }

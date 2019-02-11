@@ -6,8 +6,8 @@ type User struct {
 	ID                         string          `json:"id"`
 	Name                       string          `json:"name"`
 	Affiliation                *string         `json:"affiliation"`
-	RegisterDate               int             `json:"registerDate"`
-	LastSubmitDate             int             `json:"lastSubmitDate"`
+	RegisterDate               int64           `json:"registerDate"`
+	LastSubmitDate             int64           `json:"lastSubmitDate"`
 	Policy                     string          `json:"policy"`
 	Country                    string          `json:"country"`
 	BirthYear                  int             `json:"birthYear"`
