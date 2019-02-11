@@ -2,10 +2,6 @@ package commands
 
 import (
 	"context"
-	"fmt"
-	"syscall"
-
-	"golang.org/x/crypto/ssh/terminal"
 
 	"github.com/ken-tunc/aojtool/api"
 	"github.com/spf13/cobra"
@@ -41,29 +37,11 @@ var loginCmd = &cobra.Command{
 			abort(err)
 		}
 
-		err = client.Auth.SaveUser(*user)
+		err = saveUser(*user)
 		if err != nil {
 			abort(err)
 		}
 	},
-}
-
-func promptIdAndPassword(cmd *cobra.Command) (userId, password string, err error) {
-	cmd.Print("AOJ user id: ")
-	_, err = fmt.Scan(&userId)
-	if err != nil {
-		return "", "", err
-	}
-
-	cmd.Print("password: ")
-	bytePassword, err := terminal.ReadPassword(int(syscall.Stdin))
-	cmd.Println()
-	if err != nil {
-		return "", "", err
-	}
-
-	password = string(bytePassword)
-	return
 }
 
 func init() {

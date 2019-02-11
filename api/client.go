@@ -19,8 +19,9 @@ import (
 var cookiesCache = filepath.Join(util.CacheDir, "cookies")
 
 const (
-	endpoint  = "https://judgeapi.u-aizu.ac.jp"
-	userAgent = "aotjool"
+	apiEndpoint = "https://judgeapi.u-aizu.ac.jp"
+	datEndpoint = "https://judgedat.u-aizu.ac.jp"
+	userAgent   = "aotjool"
 )
 
 type Client struct {
@@ -36,7 +37,7 @@ type Client struct {
 }
 
 func NewClient() (*Client, error) {
-	parsedURL, err := url.ParseRequestURI(endpoint)
+	parsedURL, err := url.ParseRequestURI(apiEndpoint)
 	if err != nil {
 		return nil, err
 	}
@@ -58,10 +59,20 @@ func NewClient() (*Client, error) {
 	}
 
 	client.Auth = &AuthService{client: client}
-	client.Submit = &SubmitService{Client: client}
-	client.Status = &StatusService{Client: client}
+	client.Submit = &SubmitService{client: client}
+	client.Status = &StatusService{client: client}
 
 	return client, nil
+}
+
+func (c *Client) setEndpoint(endpoint string) error {
+	parsedURL, err := url.ParseRequestURI(endpoint)
+	if err != nil {
+		return err
+	}
+
+	c.Endpoint = parsedURL
+	return nil
 }
 
 func (c *Client) newRequest(ctx context.Context, method, path string, payload interface{}) (*http.Request, error) {

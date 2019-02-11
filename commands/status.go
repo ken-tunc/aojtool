@@ -31,7 +31,7 @@ var statusCmd = &cobra.Command{
 			return
 		}
 
-		user, err := client.Auth.MaybeLoadUser()
+		user, err := maybeLoadUser()
 		if err != nil {
 			abort(err)
 		}

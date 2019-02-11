@@ -27,14 +27,11 @@ var logoutCmd = &cobra.Command{
 		}
 
 		ctx = context.Background()
-		err = client.Auth.Logout(ctx)
-
-		if err != nil {
+		if err = client.Auth.Logout(ctx); err != nil {
 			abort(err)
 		}
 
-		err = client.Auth.RemoveUser()
-		if err != nil {
+		if err = removeUser(); err != nil {
 			abort(err)
 		}
 	},

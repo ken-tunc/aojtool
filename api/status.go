@@ -9,13 +9,17 @@ import (
 )
 
 type StatusService struct {
-	Client *Client
+	client *Client
 }
 
 func (status StatusService) FindSubmissionRecords(ctx context.Context, user *models.User, size int) ([]models.SubmissionRecord, error) {
+	if err := status.client.setEndpoint(apiEndpoint); err != nil {
+		return nil, err
+	}
+
 	path := fmt.Sprintf("/submission_records/users/%s", user.ID)
 
-	req, err := status.Client.newRequest(ctx, "GET", path, nil)
+	req, err := status.client.newRequest(ctx, "GET", path, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -24,7 +28,7 @@ func (status StatusService) FindSubmissionRecords(ctx context.Context, user *mod
 	req.URL.RawQuery = q.Encode()
 
 	records := make([]models.SubmissionRecord, size)
-	resp, err := status.Client.do(req, &records)
+	resp, err := status.client.do(req, &records)
 	if err != nil {
 		return nil, err
 	}

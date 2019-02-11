@@ -44,7 +44,7 @@ var submitCmd = &cobra.Command{
 		var user *models.User
 
 		if loggedIn {
-			user, err = client.Auth.MaybeLoadUser()
+			user, err = maybeLoadUser()
 			if err != nil {
 				abort(err)
 			}
