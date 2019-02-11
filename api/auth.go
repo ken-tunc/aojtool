@@ -3,9 +3,16 @@ package api
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+
+	"github.com/ken-tunc/aojtool/util"
 
 	"github.com/ken-tunc/aojtool/models"
 )
+
+var userCache = filepath.Join(util.CacheDir, "user")
 
 type AuthService struct {
 	client *Client
@@ -77,5 +84,53 @@ func (auth AuthService) IsLoggedIn(ctx context.Context) (bool, error) {
 		return true, nil
 	} else {
 		return false, nil
+	}
+}
+
+func (auth AuthService) SaveUser(user models.User) error {
+	absPath, err := util.EnsurePath(userCache)
+	if err != nil {
+		return err
+	}
+
+	byteUser, err := util.Serialize(&user)
+	if err != nil {
+		return err
+	}
+
+	return util.WriteBytes(byteUser, absPath)
+}
+
+func (auth AuthService) MaybeLoadUser() (*models.User, error) {
+	exist, err := util.Exists(userCache)
+	if err != nil {
+		return nil, err
+	}
+
+	if !exist {
+		return nil, nil
+	}
+
+	var user models.User
+
+	data, err := ioutil.ReadFile(userCache)
+	if err != nil {
+		return nil, err
+	}
+
+	err = util.Deserialize(data, &user)
+	return &user, err
+}
+
+func (auth AuthService) RemoveUser() error {
+	exist, err := util.Exists(userCache)
+	if err != nil {
+		return err
+	}
+
+	if exist {
+		return os.Remove(userCache)
+	} else {
+		return nil
 	}
 }

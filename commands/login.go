@@ -47,7 +47,12 @@ var loginCmd = &cobra.Command{
 		password := string(bytePassword)
 
 		ctx = context.Background()
-		_, err = client.Auth.Login(ctx, id, password)
+		user, err := client.Auth.Login(ctx, id, password)
+		if err != nil {
+			abort(err)
+		}
+
+		err = client.Auth.SaveUser(*user)
 		if err != nil {
 			abort(err)
 		}

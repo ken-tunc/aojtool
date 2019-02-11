@@ -16,7 +16,7 @@ import (
 	"github.com/ken-tunc/aojtool/util"
 )
 
-var cachePath = filepath.Join(util.CacheDir, "cookies")
+var cookiesCache = filepath.Join(util.CacheDir, "cookies")
 
 const (
 	endpoint  = "https://judgeapi.u-aizu.ac.jp"
@@ -117,12 +117,12 @@ func (c *Client) SaveCookies() error {
 		return err
 	}
 
-	err = util.WriteBytes(byteCookies, cachePath)
+	err = util.WriteBytes(byteCookies, cookiesCache)
 	if err != nil {
 		return err
 	}
 
-	err = os.Chmod(cachePath, 0600)
+	err = os.Chmod(cookiesCache, 0600)
 	if err != nil {
 		return err
 	}
@@ -131,16 +131,16 @@ func (c *Client) SaveCookies() error {
 }
 
 func (c *Client) RemoveCookies() error {
-	exist, err := util.Exists(cachePath)
+	exist, err := util.Exists(cookiesCache)
 	if err != nil {
 		return err
 	}
 
-	if !exist {
+	if exist {
+		return os.Remove(cookiesCache)
+	} else {
 		return nil
 	}
-
-	return os.Remove(cachePath)
 }
 
 func newCookieJar(u *url.URL) (*cookiejar.Jar, error) {
@@ -162,7 +162,7 @@ func newCookieJar(u *url.URL) (*cookiejar.Jar, error) {
 }
 
 func loadCookies() ([]*http.Cookie, error) {
-	exist, err := util.Exists(cachePath)
+	exist, err := util.Exists(cookiesCache)
 	if err != nil {
 		return nil, err
 	}
@@ -172,7 +172,7 @@ func loadCookies() ([]*http.Cookie, error) {
 	}
 	var cookies []*http.Cookie
 
-	data, err := ioutil.ReadFile(cachePath)
+	data, err := ioutil.ReadFile(cookiesCache)
 	if err != nil {
 		return nil, err
 	}
