@@ -53,3 +53,19 @@ func HomeDir() string {
 
 	return dir
 }
+
+func WriteBytes(data []byte, path string) error {
+	absPath, err := EnsurePath(path)
+	if err != nil {
+		return err
+	}
+
+	file, err := os.Create(absPath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	_, err = file.Write(data)
+	return err
+}

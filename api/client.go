@@ -112,27 +112,17 @@ func (c *Client) Cookies() []*http.Cookie {
 }
 
 func (c *Client) SaveCookies() error {
-	path, err := util.EnsurePath(cachePath)
-	if err != nil {
-		return err
-	}
-
-	file, err := os.Create(path)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
 	byteCookies, err := util.Serialize(c.Cookies())
 	if err != nil {
 		return err
 	}
-	_, err = file.Write(byteCookies)
+
+	err = util.WriteBytes(byteCookies, cachePath)
 	if err != nil {
 		return err
 	}
 
-	err = os.Chmod(path, 0600)
+	err = os.Chmod(cachePath, 0600)
 	if err != nil {
 		return err
 	}
@@ -180,7 +170,6 @@ func loadCookies() ([]*http.Cookie, error) {
 	if !exist {
 		return nil, nil
 	}
-
 	var cookies []*http.Cookie
 
 	data, err := ioutil.ReadFile(cachePath)
