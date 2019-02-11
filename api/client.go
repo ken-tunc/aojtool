@@ -30,7 +30,8 @@ type Client struct {
 	httpClient *http.Client
 	cookieJar  *cookiejar.Jar
 
-	Auth *AuthService
+	Auth   *AuthService
+	Submit *SubmitService
 }
 
 func NewClient() (*Client, error) {
@@ -56,6 +57,7 @@ func NewClient() (*Client, error) {
 	}
 
 	client.Auth = &AuthService{client: client}
+	client.Submit = &SubmitService{Client: client}
 
 	return client, nil
 }

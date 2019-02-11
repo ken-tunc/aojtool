@@ -30,24 +30,13 @@ var loginCmd = &cobra.Command{
 			return
 		}
 
-		var id string
-		cmd.Print("AOJ user id: ")
-		_, err = fmt.Scan(&id)
+		userId, password, err := promptIdAndPassword(cmd)
 		if err != nil {
 			abort(err)
 		}
-
-		cmd.Print("password: ")
-		bytePassword, err := terminal.ReadPassword(int(syscall.Stdin))
-		cmd.Println()
-		if err != nil {
-			abort(err)
-		}
-
-		password := string(bytePassword)
 
 		ctx = context.Background()
-		user, err := client.Auth.Login(ctx, id, password)
+		user, err := client.Auth.Login(ctx, userId, password)
 		if err != nil {
 			abort(err)
 		}
@@ -57,6 +46,24 @@ var loginCmd = &cobra.Command{
 			abort(err)
 		}
 	},
+}
+
+func promptIdAndPassword(cmd *cobra.Command) (userId, password string, err error) {
+	cmd.Print("AOJ user id: ")
+	_, err = fmt.Scan(&userId)
+	if err != nil {
+		return "", "", err
+	}
+
+	cmd.Print("password: ")
+	bytePassword, err := terminal.ReadPassword(int(syscall.Stdin))
+	cmd.Println()
+	if err != nil {
+		return "", "", err
+	}
+
+	password = string(bytePassword)
+	return
 }
 
 func init() {

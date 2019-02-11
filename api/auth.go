@@ -22,7 +22,7 @@ func (auth AuthService) Login(ctx context.Context, id, password string) (*models
 	var body = struct {
 		ID       string `json:"id"`
 		Password string `json:"password"`
-	}{ID: id, Password: password}
+	}{id, password}
 
 	req, err := auth.client.newRequest(ctx, "POST", "/session", body)
 	if err != nil {
