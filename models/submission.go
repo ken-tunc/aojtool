@@ -27,6 +27,8 @@ func (status SubmissionStatus) String() string {
 		return "Memory Limit"
 	case Accepted:
 		return "Accepted"
+	case Waiting:
+		return "Waiting"
 	case OutputLimit:
 		return "Output Limit"
 	case RuntimeError:
