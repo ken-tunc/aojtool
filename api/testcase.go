@@ -19,7 +19,7 @@ func (test *TestService) FindSamples(ctx context.Context, problemId string) ([]m
 	}
 
 	testCases := make([]models.TestCase, 0)
-	resp, err := test.client.do(req, testCases)
+	resp, err := test.client.do(req, &testCases)
 	if err != nil {
 		return nil, err
 	}
