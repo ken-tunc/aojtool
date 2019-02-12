@@ -40,6 +40,10 @@ var statusCmd = &cobra.Command{
 		cmd.Println("[AOJ user status]")
 		printUser(cmd, user)
 
+		if Size < 1 {
+			return
+		}
+
 		ctx = context.Background()
 		records, err := client.Status.FindSubmissionRecords(ctx, user, Size)
 		if err != nil {
