@@ -12,16 +12,12 @@ type AuthService struct {
 }
 
 func (auth AuthService) Login(ctx context.Context, id, password string) (*models.User, error) {
-	if err := auth.client.setEndpoint(apiEndpoint); err != nil {
-		return nil, err
-	}
-
 	var body = struct {
 		ID       string `json:"id"`
 		Password string `json:"password"`
 	}{id, password}
 
-	req, err := auth.client.newRequest(ctx, "POST", "/session", body)
+	req, err := auth.client.newRequest(ctx, apiEndpoint, "POST", "/session", body)
 	if err != nil {
 		return nil, err
 	}
@@ -43,11 +39,7 @@ func (auth AuthService) Login(ctx context.Context, id, password string) (*models
 }
 
 func (auth AuthService) Logout(ctx context.Context) error {
-	if err := auth.client.setEndpoint(apiEndpoint); err != nil {
-		return err
-	}
-
-	req, err := auth.client.newRequest(ctx, "DELETE", "/session", nil)
+	req, err := auth.client.newRequest(ctx, apiEndpoint, "DELETE", "/session", nil)
 	if err != nil {
 		return err
 	}
@@ -69,11 +61,7 @@ func (auth AuthService) Logout(ctx context.Context) error {
 }
 
 func (auth AuthService) IsLoggedIn(ctx context.Context) (bool, error) {
-	if err := auth.client.setEndpoint(apiEndpoint); err != nil {
-		return false, err
-	}
-
-	req, err := auth.client.newRequest(ctx, "GET", "/self", nil)
+	req, err := auth.client.newRequest(ctx, apiEndpoint, "GET", "/self", nil)
 	if err != nil {
 		return false, err
 	}

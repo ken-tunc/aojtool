@@ -34,6 +34,7 @@ type Client struct {
 	Auth   *AuthService
 	Submit *SubmitService
 	Status *StatusService
+	Test   *TestService
 }
 
 func NewClient() (*Client, error) {
@@ -61,21 +62,18 @@ func NewClient() (*Client, error) {
 	client.Auth = &AuthService{client: client}
 	client.Submit = &SubmitService{client: client}
 	client.Status = &StatusService{client: client}
+	client.Test = &TestService{client: client}
 
 	return client, nil
 }
 
-func (c *Client) setEndpoint(endpoint string) error {
+func (c *Client) newRequest(ctx context.Context, endpoint, method, path string, payload interface{}) (*http.Request, error) {
 	parsedURL, err := url.ParseRequestURI(endpoint)
 	if err != nil {
-		return err
+		return nil, err
 	}
-
 	c.Endpoint = parsedURL
-	return nil
-}
 
-func (c *Client) newRequest(ctx context.Context, method, path string, payload interface{}) (*http.Request, error) {
 	ref := &url.URL{Path: path}
 	u := c.Endpoint.ResolveReference(ref)
 

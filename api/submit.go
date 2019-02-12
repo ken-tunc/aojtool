@@ -10,17 +10,13 @@ type SubmitService struct {
 }
 
 func (submit SubmitService) Submit(ctx context.Context, problemId, language, sourceCode string) error {
-	if err := submit.client.setEndpoint(apiEndpoint); err != nil {
-		return err
-	}
-
 	var body = struct {
 		ProblemId  string `json:"problemId"`
 		Language   string `json:"language"`
 		SourceCode string `json:"sourceCode"`
 	}{problemId, language, sourceCode}
 
-	req, err := submit.client.newRequest(ctx, "POST", "submissions", body)
+	req, err := submit.client.newRequest(ctx, apiEndpoint, "POST", "submissions", body)
 	if err != nil {
 		return err
 	}

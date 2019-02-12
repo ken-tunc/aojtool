@@ -13,13 +13,9 @@ type StatusService struct {
 }
 
 func (status StatusService) FindSubmissionRecords(ctx context.Context, user *models.User, size int) ([]models.SubmissionRecord, error) {
-	if err := status.client.setEndpoint(apiEndpoint); err != nil {
-		return nil, err
-	}
-
 	path := fmt.Sprintf("/submission_records/users/%s", user.ID)
 
-	req, err := status.client.newRequest(ctx, "GET", path, nil)
+	req, err := status.client.newRequest(ctx, apiEndpoint, "GET", path, nil)
 	if err != nil {
 		return nil, err
 	}
