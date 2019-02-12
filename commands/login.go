@@ -26,7 +26,7 @@ var loginCmd = &cobra.Command{
 			return
 		}
 
-		userId, password, err := promptIdAndPassword(cmd)
+		userId, password, err := promptIdAndPassword(cmd.OutOrStderr())
 		if err != nil {
 			abort(err)
 		}

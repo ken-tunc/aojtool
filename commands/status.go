@@ -3,6 +3,7 @@ package commands
 import (
 	"context"
 	"fmt"
+	"io"
 	"text/tabwriter"
 
 	"github.com/ken-tunc/aojtool/api"
@@ -38,7 +39,7 @@ var statusCmd = &cobra.Command{
 			abort(err)
 		}
 		cmd.Println("[AOJ user status]")
-		printUser(cmd, user)
+		printUser(cmd.OutOrStderr(), user)
 
 		if Size < 1 {
 			return
@@ -55,7 +56,7 @@ var statusCmd = &cobra.Command{
 			if i == 0 {
 				cmd.Printf("[Recent %d submission status]\n", Size)
 			}
-			printSubmissionRecord(cmd, record)
+			printSubmissionRecord(cmd.OutOrStderr(), record)
 		}
 	},
 }
@@ -65,20 +66,20 @@ func init() {
 	rootCmd.AddCommand(statusCmd)
 }
 
-func printUser(cmd *cobra.Command, user *models.User) {
-	w := tabwriter.NewWriter(cmd.OutOrStderr(), 0, 0, 1, ' ', tabwriter.TabIndent)
-	fmt.Fprintf(w, "User ID\t%s\n", user.ID)
-	fmt.Fprintf(w, "Last Submit Date\t%s\n", util.TimeFromUnix(user.LastSubmitDate))
-	fmt.Fprintf(w, "Default Programming Language\t%s\n", user.DefaultProgrammingLanguage)
-	w.Flush()
+func printUser(w io.Writer, user *models.User) {
+	tabWriter := tabwriter.NewWriter(w, 0, 0, 1, ' ', tabwriter.TabIndent)
+	fmt.Fprintf(tabWriter, "User ID\t%s\n", user.ID)
+	fmt.Fprintf(tabWriter, "Last Submit Date\t%s\n", util.TimeFromUnix(user.LastSubmitDate))
+	fmt.Fprintf(tabWriter, "Default Programming SubmitLanguage\t%s\n", user.DefaultProgrammingLanguage)
+	tabWriter.Flush()
 }
 
-func printSubmissionRecord(cmd *cobra.Command, record models.SubmissionRecord) {
-	w := tabwriter.NewWriter(cmd.OutOrStderr(), 0, 0, 1, ' ', tabwriter.TabIndent)
+func printSubmissionRecord(out io.Writer, record models.SubmissionRecord) {
+	w := tabwriter.NewWriter(out, 0, 0, 1, ' ', tabwriter.TabIndent)
 	fmt.Fprintf(w, "Judge ID\t%d\n", record.JudgeId)
 	fmt.Fprintf(w, "Problem ID\t%s\n", record.ProblemId)
 	fmt.Fprintf(w, "Submission Date\t%s\n", util.TimeFromUnix(record.SubmissionDate))
-	fmt.Fprintf(w, "Language\t%s\n", record.Language)
+	fmt.Fprintf(w, "SubmitLanguage\t%s\n", record.Language)
 	fmt.Fprintf(w, "Status\t%s\n", record.Status.String())
 	fmt.Fprintf(w, "Score\t%d\n", record.Score)
 	if record.Accuracy != nil {

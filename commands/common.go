@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -9,22 +10,21 @@ import (
 
 	"github.com/ken-tunc/aojtool/models"
 	"github.com/ken-tunc/aojtool/util"
-	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
 )
 
 var userCache = filepath.Join(util.CacheDir, "user")
 
-func promptIdAndPassword(cmd *cobra.Command) (userId, password string, err error) {
-	cmd.Print("AOJ user id: ")
+func promptIdAndPassword(w io.Writer) (userId, password string, err error) {
+	io.WriteString(w, "AOJ user id: ")
 	_, err = fmt.Scan(&userId)
 	if err != nil {
 		return "", "", err
 	}
 
-	cmd.Print("password: ")
+	io.WriteString(w, "password: ")
 	bytePassword, err := terminal.ReadPassword(int(syscall.Stdin))
-	cmd.Println()
+	io.WriteString(w, "\n")
 	if err != nil {
 		return "", "", err
 	}

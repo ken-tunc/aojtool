@@ -15,7 +15,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var Language string
+var SubmitLanguage string
 
 var submitCmd = &cobra.Command{
 	Use:   "submit [-l language] [problem-id] [source-file]",
@@ -49,7 +49,7 @@ var submitCmd = &cobra.Command{
 				abort(err)
 			}
 		} else {
-			userId, password, err := promptIdAndPassword(cmd)
+			userId, password, err := promptIdAndPassword(cmd.OutOrStderr())
 			if err != nil {
 				abort(err)
 			}
@@ -61,8 +61,8 @@ var submitCmd = &cobra.Command{
 			}
 		}
 
-		if Language == "" {
-			Language = user.DefaultProgrammingLanguage
+		if SubmitLanguage == "" {
+			SubmitLanguage = user.DefaultProgrammingLanguage
 		}
 
 		exist, err := util.Exists(sourceFile)
@@ -81,7 +81,7 @@ var submitCmd = &cobra.Command{
 
 		sourceCode := string(byteSourceCode)
 		ctx = context.Background()
-		err = client.Submit.Submit(ctx, problemId, Language, sourceCode)
+		err = client.Submit.Submit(ctx, problemId, SubmitLanguage, sourceCode)
 
 		if err != nil {
 			abort(err)
@@ -90,6 +90,6 @@ var submitCmd = &cobra.Command{
 }
 
 func init() {
-	submitCmd.Flags().StringVarP(&Language, "language", "l", "", "programming language written in")
+	submitCmd.Flags().StringVarP(&SubmitLanguage, "language", "l", "", "programming language written in")
 	rootCmd.AddCommand(submitCmd)
 }
