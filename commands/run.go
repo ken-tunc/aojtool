@@ -2,6 +2,9 @@ package commands
 
 import (
 	"errors"
+	"fmt"
+
+	"github.com/ken-tunc/aojtool/util"
 
 	"github.com/spf13/cobra"
 )
@@ -14,6 +17,9 @@ var runCmd = &cobra.Command{
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 2 {
 			return errors.New("requires at least two args")
+		}
+		if !util.IsAcceptableLanguage(RunLanguage) {
+			return fmt.Errorf("invalid language: %s", RunLanguage)
 		}
 		return nil
 	},

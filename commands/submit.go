@@ -24,6 +24,9 @@ var submitCmd = &cobra.Command{
 		if len(args) < 2 {
 			return errors.New("requires at least two args")
 		}
+		if !util.IsAcceptableLanguage(SubmitLanguage) {
+			return fmt.Errorf("invalid language: %s", SubmitLanguage)
+		}
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
