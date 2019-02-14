@@ -12,18 +12,18 @@ import (
 
 var tempDir = filepath.Join(CacheDir, "tmp")
 
-type Processor struct {
+type CodeProcessor struct {
 	Language string
 	Source   string
 	Target   string
 }
 
-func NewProcessor(language, file string) Processor {
+func NewProcessor(language, file string) CodeProcessor {
 	target := filepath.Join(tempDir, "a.out")
-	return Processor{language, file, target}
+	return CodeProcessor{language, file, target}
 }
 
-func (p *Processor) Exec(input string, timeout time.Duration) (string, error) {
+func (p *CodeProcessor) Exec(input string, timeout time.Duration) (string, error) {
 	if err := p.compile(); err != nil {
 		return "", err
 	}
@@ -35,7 +35,7 @@ func (p *Processor) Exec(input string, timeout time.Duration) (string, error) {
 	return p.exec(ctx, input)
 }
 
-func (p *Processor) compile() error {
+func (p *CodeProcessor) compile() error {
 	var compileCmd []string
 	switch p.Language {
 	case "C":
@@ -76,7 +76,7 @@ func (p *Processor) compile() error {
 	return nil
 }
 
-func (p *Processor) exec(ctx context.Context, input string) (string, error) {
+func (p *CodeProcessor) exec(ctx context.Context, input string) (string, error) {
 	defer func() {
 		exist, _ := Exists(tempDir)
 		if exist {

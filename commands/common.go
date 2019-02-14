@@ -80,3 +80,8 @@ func removeUser() error {
 		return nil
 	}
 }
+
+func abort(err error) {
+	rootCmd.Println(err)
+	os.Exit(1)
+}

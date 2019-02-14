@@ -38,18 +38,23 @@ type Client struct {
 }
 
 func NewClient() (*Client, error) {
-	parsedURL, err := url.ParseRequestURI(apiEndpoint)
+	apiURL, err := url.ParseRequestURI(apiEndpoint)
 	if err != nil {
 		return nil, err
 	}
 
-	cookieJar, err := newCookieJar(parsedURL)
+	datURL, err := url.ParseRequestURI(datEndpoint)
+	if err != nil {
+		return nil, err
+	}
+
+	cookieJar, err := newCookieJar(apiURL, datURL)
 	if err != nil {
 		return nil, err
 	}
 
 	var client = &Client{
-		Endpoint:  parsedURL,
+		Endpoint:  nil,
 		UserAgent: userAgent,
 
 		httpClient: &http.Client{
@@ -156,7 +161,7 @@ func (c *Client) RemoveCookies() error {
 	}
 }
 
-func newCookieJar(u *url.URL) (*cookiejar.Jar, error) {
+func newCookieJar(urls ...*url.URL) (*cookiejar.Jar, error) {
 	jar, err := cookiejar.New(nil)
 	if err != nil {
 		return nil, err
@@ -168,7 +173,9 @@ func newCookieJar(u *url.URL) (*cookiejar.Jar, error) {
 	}
 
 	if cookies != nil {
-		jar.SetCookies(u, cookies)
+		for _, u := range urls {
+			jar.SetCookies(u, cookies)
+		}
 	}
 
 	return jar, nil

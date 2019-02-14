@@ -1,8 +1,6 @@
 package commands
 
 import (
-	"os"
-
 	"github.com/spf13/cobra"
 )
 
@@ -15,9 +13,4 @@ func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		abort(err)
 	}
-}
-
-func abort(err error) {
-	rootCmd.Println(err)
-	os.Exit(1)
 }
