@@ -12,7 +12,7 @@ A CLI automation tool for [Aizu Online Jude](http://judge.u-aizu.ac.jp/onlinejud
 $ go get github.com/ken-tunc/aojtool
 ```
 
-Make sure that `$GPATH/bin` in your `$PATH`.
+Make sure that `$GOPATH/bin` in your `$PATH`.
 
 ## Usage
 
