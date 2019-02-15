@@ -46,22 +46,13 @@ var submitCmd = &cobra.Command{
 
 		var user *models.User
 
-		if loggedIn {
-			user, err = maybeLoadUser()
-			if err != nil {
-				abort(err)
-			}
-		} else {
-			userId, password, err := promptIdAndPassword(cmd.OutOrStderr())
-			if err != nil {
-				abort(err)
-			}
+		if !loggedIn {
+			abort(errors.New("not logged in"))
+		}
 
-			ctx = context.Background()
-			user, err = client.Auth.Login(ctx, userId, password)
-			if err != nil {
-				abort(err)
-			}
+		user, err = maybeLoadUser()
+		if err != nil {
+			abort(err)
 		}
 
 		if SubmitLanguage == "" {

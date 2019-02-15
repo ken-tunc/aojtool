@@ -1,37 +1,15 @@
 package commands
 
 import (
-	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"syscall"
 
 	"github.com/ken-tunc/aojtool/models"
 	"github.com/ken-tunc/aojtool/util"
-	"golang.org/x/crypto/ssh/terminal"
 )
 
 var userCache = filepath.Join(util.CacheDir, "user")
-
-func promptIdAndPassword(w io.Writer) (userId, password string, err error) {
-	io.WriteString(w, "AOJ user id: ")
-	_, err = fmt.Scan(&userId)
-	if err != nil {
-		return "", "", err
-	}
-
-	io.WriteString(w, "password: ")
-	bytePassword, err := terminal.ReadPassword(int(syscall.Stdin))
-	io.WriteString(w, "\n")
-	if err != nil {
-		return "", "", err
-	}
-
-	password = string(bytePassword)
-	return
-}
 
 func saveUser(user models.User) error {
 	absPath, err := util.EnsurePath(userCache)

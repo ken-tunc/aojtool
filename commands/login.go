@@ -2,6 +2,10 @@ package commands
 
 import (
 	"context"
+	"fmt"
+	"syscall"
+
+	"golang.org/x/crypto/ssh/terminal"
 
 	"github.com/ken-tunc/aojtool/api"
 	"github.com/spf13/cobra"
@@ -26,13 +30,23 @@ var loginCmd = &cobra.Command{
 			return
 		}
 
-		userId, password, err := promptIdAndPassword(cmd.OutOrStderr())
+		var id string
+		cmd.Print("AOJ user id: ")
+		_, err = fmt.Scan(&id)
 		if err != nil {
 			abort(err)
 		}
 
+		cmd.Print("password: ")
+		bytePassword, err := terminal.ReadPassword(int(syscall.Stdin))
+		if err != nil {
+			abort(err)
+		}
+		cmd.Println()
+		password := string(bytePassword)
+
 		ctx = context.Background()
-		user, err := client.Auth.Login(ctx, userId, password)
+		user, err := client.Auth.Login(ctx, id, password)
 		if err != nil {
 			abort(err)
 		}
