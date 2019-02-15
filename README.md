@@ -1,8 +1,8 @@
 # aojtool
 
-A CLI automation tool for [Aizu Online Jude](http://judge.u-aizu.ac.jp/onlinejudge).
+A CLI automation tool for [Aizu Online Judge](http://judge.u-aizu.ac.jp/onlinejudge).
 
-- Run your code with sample inputs and compare it with the correct outputs
+- Run your code with sample inputs and compare with the correct outputs
 - Submit your code to AOJ
 - Enable you to check your profile and recent submission status
 
@@ -18,7 +18,7 @@ Make sure that `$GOPATH/bin` in your `$PATH`.
 
 ### Login
 
-Login to Aizu Online Judge(AOJ).
+Login to Aizu Online Judge.
 ```console
 $ aojtool login
 ```
