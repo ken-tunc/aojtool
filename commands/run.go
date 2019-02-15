@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/sergi/go-diff/diffmatchpatch"
+
 	"github.com/ken-tunc/aojtool/api"
 
 	"github.com/ken-tunc/aojtool/util"
@@ -81,8 +83,9 @@ var runCmd = &cobra.Command{
 				cmd.Println("Pass.")
 			} else {
 				cmd.Println("Wrong answer...")
-				cmd.Printf("output: %s\n", out)
-				cmd.Printf("Oracle: %s\n", oracle)
+				dmp := diffmatchpatch.New()
+				diffs := dmp.DiffMain(out, oracle, true)
+				cmd.Println(dmp.DiffPrettyText(diffs))
 				break
 			}
 		}
