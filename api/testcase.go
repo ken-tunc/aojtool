@@ -19,12 +19,8 @@ func (test *TestService) FindSamples(ctx context.Context, problemId string) ([]m
 	}
 
 	testCases := make([]models.TestCase, 0)
-	resp, err := test.client.do(req, &testCases)
-	if err != nil {
+	if err := test.client.do(req, &testCases); err != nil {
 		return nil, err
-	}
-	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("failed to get samples, status code: %s", resp.Status)
 	}
 
 	return testCases, nil

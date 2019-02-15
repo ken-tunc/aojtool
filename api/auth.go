@@ -2,7 +2,8 @@ package api
 
 import (
 	"context"
-	"fmt"
+
+	"github.com/ken-tunc/aojtool/util"
 
 	"github.com/ken-tunc/aojtool/models"
 )
@@ -23,12 +24,8 @@ func (auth AuthService) Login(ctx context.Context, id, password string) (*models
 	}
 
 	var user models.User
-	resp, err := auth.client.do(req, &user)
-	if err != nil {
-		return nil, fmt.Errorf("login failed")
-	}
-	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("login failed, status code: %s", resp.Status)
+	if err := auth.client.do(req, &user); err != nil {
+		return nil, err
 	}
 
 	if err = auth.client.SaveCookies(); err != nil {
@@ -44,13 +41,8 @@ func (auth AuthService) Logout(ctx context.Context) error {
 		return err
 	}
 
-	resp, err := auth.client.do(req, nil)
-	if err != nil {
+	if err := auth.client.do(req, nil); err != nil {
 		return err
-	}
-
-	if resp.StatusCode != 204 {
-		return fmt.Errorf("logout failed, status code: %s", resp.Status)
 	}
 
 	if err = auth.client.RemoveCookies(); err != nil {
@@ -66,14 +58,14 @@ func (auth AuthService) IsLoggedIn(ctx context.Context) (bool, error) {
 		return false, err
 	}
 
-	resp, err := auth.client.do(req, nil)
-	if err != nil {
-		return false, err
+	if err = auth.client.do(req, nil); err != nil {
+		_, ok := err.(util.ApiErrors)
+		if ok {
+			return false, nil
+		} else {
+			return false, err
+		}
 	}
 
-	if resp.StatusCode == 200 {
-		return true, nil
-	} else {
-		return false, nil
-	}
+	return true, nil
 }

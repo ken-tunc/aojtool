@@ -24,12 +24,8 @@ func (status StatusService) FindSubmissionRecords(ctx context.Context, user *mod
 	req.URL.RawQuery = q.Encode()
 
 	records := make([]models.SubmissionRecord, size)
-	resp, err := status.client.do(req, &records)
-	if err != nil {
+	if err := status.client.do(req, &records); err != nil {
 		return nil, err
-	}
-	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("failed to get submission records, status code: %s", resp.Status)
 	}
 
 	return records, nil

@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"fmt"
 )
 
 type SubmitService struct {
@@ -21,13 +20,8 @@ func (submit SubmitService) Submit(ctx context.Context, problemId, language, sou
 		return err
 	}
 
-	resp, err := submit.client.do(req, nil)
-	if err != nil {
+	if err := submit.client.do(req, nil); err != nil {
 		return err
-	}
-
-	if resp.StatusCode != 200 {
-		return fmt.Errorf("login failed, status code: %s", resp.Status)
 	}
 
 	return nil

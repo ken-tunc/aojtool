@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -107,22 +108,29 @@ func (c *Client) newRequest(ctx context.Context, endpoint, method, path string, 
 	return req, nil
 }
 
-func (c *Client) do(req *http.Request, v interface{}) (*http.Response, error) {
+func (c *Client) do(req *http.Request, v interface{}) error {
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer resp.Body.Close()
 
-	if v == nil {
-		return resp, nil
+	if resp.StatusCode >= 400 {
+		var apiErrors util.ApiErrors
+		err = json.NewDecoder(resp.Body).Decode(&apiErrors)
+		if err != nil {
+			return fmt.Errorf("http error: %s", resp.Status)
+		} else {
+
+			return apiErrors
+		}
 	}
 
-	err = json.NewDecoder(resp.Body).Decode(v)
-	if err != nil {
-		return nil, err
+	if v == nil {
+		return nil
+	} else {
+		return json.NewDecoder(resp.Body).Decode(v)
 	}
-	return resp, nil
 }
 
 func (c *Client) Cookies() []*http.Cookie {
