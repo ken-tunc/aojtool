@@ -65,10 +65,10 @@ func NewClient() (*Client, error) {
 		cookieJar: cookieJar,
 	}
 
-	client.Auth = &AuthService{client: client}
-	client.Submit = &SubmitService{client: client}
-	client.Status = &StatusService{client: client}
-	client.Test = &TestService{client: client}
+	client.Auth = &AuthService{client}
+	client.Submit = &SubmitService{client}
+	client.Status = &StatusService{client}
+	client.Test = &TestService{client}
 
 	return client, nil
 }
@@ -121,7 +121,6 @@ func (c *Client) do(req *http.Request, v interface{}) error {
 		if err != nil {
 			return fmt.Errorf("http error: %s", resp.Status)
 		} else {
-
 			return apiErrors
 		}
 	}

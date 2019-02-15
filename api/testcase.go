@@ -11,7 +11,7 @@ type TestService struct {
 	client *Client
 }
 
-func (test *TestService) FindSamples(ctx context.Context, problemId string) ([]models.TestCase, error) {
+func (test TestService) FindSamples(ctx context.Context, problemId string) ([]models.TestCase, error) {
 	path := fmt.Sprintf("/testcases/samples/%s", problemId)
 	req, err := test.client.newRequest(ctx, datEndpoint, "GET", path, nil)
 	if err != nil {
