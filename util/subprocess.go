@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
@@ -138,6 +139,8 @@ func NewCodeRunner(file string, timeout time.Duration) (*CodeRunner, error) {
 }
 
 func (c *CodeRunner) Run(input string) (string, error) {
+	defer os.RemoveAll(tempDir)
+
 	cmd := exec.Command(c.compileCmd[0], c.compileCmd[1:]...)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
