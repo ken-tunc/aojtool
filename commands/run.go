@@ -48,7 +48,7 @@ var runCmd = &cobra.Command{
 		}
 
 		timeout := time.Duration(TimeOutSec) * time.Second
-		runner, err := util.NewRunCommand(sourceFile, timeout)
+		runner, err := util.NewCodeRunner(sourceFile, timeout)
 		if err != nil {
 			abort(err)
 		}

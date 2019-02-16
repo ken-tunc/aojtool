@@ -19,7 +19,7 @@ type CodeRunner struct {
 	timeout    time.Duration
 }
 
-func NewRunCommand(file string, timeout time.Duration) (*CodeRunner, error) {
+func NewCodeRunner(file string, timeout time.Duration) (*CodeRunner, error) {
 	ext := filepath.Ext(file)
 	language := NewLanguage(ext)
 	if language == UnknownLanguage {
