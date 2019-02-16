@@ -17,19 +17,15 @@ import (
 )
 
 var (
-	RunLanguage string
-	TimeOutSec  int
+	TimeOutSec int
 )
 
 var runCmd = &cobra.Command{
-	Use:   "run [-l language] [-t timeout] [problem-id] [source-file]",
+	Use:   "run [-t timeout] [problem-id] [source-file]",
 	Short: "Run program with sample inputs.",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 2 {
 			return errors.New("requires at least two args")
-		}
-		if RunLanguage != "" && !util.IsAcceptableLanguage(RunLanguage) {
-			return fmt.Errorf("invalid language: %s", RunLanguage)
 		}
 		if TimeOutSec < 1 {
 			return fmt.Errorf("invalid timeout seconds: %d", TimeOutSec)
@@ -51,29 +47,15 @@ var runCmd = &cobra.Command{
 			abort(err)
 		}
 
-		if RunLanguage == "" {
-			ctx := context.Background()
-			loggedIn, err := client.Auth.IsLoggedIn(ctx)
-			if err != nil {
-				abort(err)
-			}
-
-			if !loggedIn {
-				abort(errors.New("not logged in"))
-			}
-
-			user, err := maybeLoadUser()
-			if err != nil {
-				abort(err)
-			}
-			RunLanguage = user.DefaultProgrammingLanguage
+		timeout := time.Duration(TimeOutSec) * time.Second
+		runner, err := util.NewRunCommand(sourceFile, timeout)
+		if err != nil {
+			abort(err)
 		}
 
-		processor := util.NewProcessor(RunLanguage, sourceFile)
 		for _, sample := range samples {
 			cmd.Printf("[Sample %d]\n", sample.Serial)
-			timeout := time.Duration(TimeOutSec) * time.Second
-			out, err := processor.Exec(sample.In, timeout)
+			out, err := runner.Run(sample.In)
 			out = strings.TrimSpace(out)
 			oracle := strings.TrimSpace(sample.Out)
 			if err != nil {
@@ -93,7 +75,6 @@ var runCmd = &cobra.Command{
 }
 
 func init() {
-	runCmd.Flags().StringVarP(&RunLanguage, "language", "l", "", "programming language written in")
-	runCmd.Flags().IntVarP(&TimeOutSec, "timeout", "t", 5, "execution timeout seconds")
+	runCmd.Flags().IntVarP(&TimeOutSec, "timeout", "t", 60, "execution timeout seconds")
 	rootCmd.AddCommand(runCmd)
 }

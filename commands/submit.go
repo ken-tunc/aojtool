@@ -24,8 +24,11 @@ var submitCmd = &cobra.Command{
 		if len(args) < 2 {
 			return errors.New("requires at least two args")
 		}
-		if SubmitLanguage != "" && !util.IsAcceptableLanguage(SubmitLanguage) {
-			return fmt.Errorf("invalid language: %s", SubmitLanguage)
+		formalLang, err := util.FormalLanguage(SubmitLanguage)
+		if SubmitLanguage != "" && err != nil {
+			return err
+		} else {
+			SubmitLanguage = formalLang
 		}
 		return nil
 	},

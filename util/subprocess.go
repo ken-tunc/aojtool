@@ -2,113 +2,153 @@ package util
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
-	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"time"
 )
 
 var tempDir = filepath.Join(CacheDir, "tmp")
 
-type CodeProcessor struct {
-	Language string
-	Source   string
-	Target   string
+type CodeRunner struct {
+	compileCmd []string
+	execCmd    []string
+	timeout    time.Duration
 }
 
-func NewProcessor(language, file string) CodeProcessor {
-	target := filepath.Join(tempDir, "a.out")
-	return CodeProcessor{language, file, target}
+func NewRunCommand(file string, timeout time.Duration) (*CodeRunner, error) {
+	ext := filepath.Ext(file)
+	language := NewLanguage(ext)
+	if language == UnknownLanguage {
+		return nil, fmt.Errorf("invalid extension: %s", file)
+	}
+
+	path := filepath.Join(tempDir, "exec")
+	executable, err := EnsurePath(path)
+	if err != nil {
+		return nil, err
+	}
+
+	switch language {
+	case C:
+		return &CodeRunner{
+			compileCmd: []string{"gcc", "-o", executable, file},
+			execCmd:    []string{executable},
+			timeout:    timeout,
+		}, nil
+	case Cpp:
+		return &CodeRunner{
+			compileCmd: []string{"g++", "-std=c++14", "-o", executable, file},
+			execCmd:    []string{executable},
+			timeout:    timeout,
+		}, nil
+	case Java:
+		return &CodeRunner{
+			compileCmd: []string{"javac", "-d", tempDir, file},
+			execCmd:    []string{"java", "-classpath", tempDir, "Main"},
+			timeout:    timeout,
+		}, nil
+	case Scala:
+		return &CodeRunner{
+			compileCmd: []string{"scalac", "-d", tempDir, file},
+			execCmd:    []string{"scala", "-classpath", tempDir, "Main"},
+			timeout:    timeout,
+		}, nil
+	case Haskel:
+		return &CodeRunner{
+			compileCmd: nil,
+			execCmd:    []string{"runghc", file},
+			timeout:    timeout,
+		}, nil
+	case OCaml:
+		return &CodeRunner{
+			compileCmd: nil,
+			execCmd:    []string{"ocaml", file},
+			timeout:    timeout,
+		}, nil
+	case Cs:
+		var compiler string
+		var execCmd []string
+		if runtime.GOOS == "windows" {
+			compiler = "csc"
+			execCmd = []string{executable}
+		} else {
+			compiler = "mcs"
+			execCmd = []string{"mono", executable}
+		}
+		return &CodeRunner{
+			compileCmd: []string{compiler, "-out:" + executable, file},
+			execCmd:    execCmd,
+			timeout:    timeout,
+		}, nil
+	case D:
+		return &CodeRunner{
+			compileCmd: nil,
+			execCmd:    []string{"rdmd", file},
+			timeout:    timeout,
+		}, nil
+	case Ruby:
+		return &CodeRunner{
+			compileCmd: nil,
+			execCmd:    []string{"ruby", file},
+			timeout:    timeout,
+		}, nil
+	case Python:
+		return &CodeRunner{
+			compileCmd: nil,
+			execCmd:    []string{"/usr/bin/env", "python", file},
+			timeout:    timeout,
+		}, nil
+	case PHP:
+		return &CodeRunner{
+			compileCmd: nil,
+			execCmd:    []string{"php", file},
+			timeout:    timeout,
+		}, nil
+	case JavaScript:
+		return &CodeRunner{
+			compileCmd: nil,
+			execCmd:    []string{"node", file},
+			timeout:    timeout,
+		}, nil
+	case Rust:
+		return &CodeRunner{
+			compileCmd: []string{"rustc", "-o", executable, file},
+			execCmd:    []string{executable},
+			timeout:    timeout,
+		}, nil
+	case Go:
+		return &CodeRunner{
+			compileCmd: nil,
+			execCmd:    []string{"go", "run", file},
+			timeout:    timeout,
+		}, nil
+	case Kotlin:
+		return &CodeRunner{
+			compileCmd: []string{"kotlinc", "-include-runtime", "-d", tempDir, file},
+			execCmd:    []string{"java", "-classpath", tempDir, "Main"},
+			timeout:    timeout,
+		}, nil
+	default:
+		return nil, errors.New("invalid language")
+	}
 }
 
-func (p *CodeProcessor) Exec(input string, timeout time.Duration) (string, error) {
-	if err := p.compile(); err != nil {
-		return "", err
+func (c *CodeRunner) Run(input string) (string, error) {
+	cmd := exec.Command(c.compileCmd[0], c.compileCmd[1:]...)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf("compile error: %s", out)
 	}
 
 	ctx := context.Background()
-	ctx, cancel := context.WithTimeout(ctx, timeout)
+	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 
-	return p.exec(ctx, input)
-}
-
-func (p *CodeProcessor) compile() error {
-	var compileCmd []string
-	switch p.Language {
-	case "C":
-		compileCmd = []string{"gcc", "-o", p.Target, p.Source}
-	case "C++":
-		compileCmd = []string{"g++", "-o", p.Target, p.Source}
-	case "C++11":
-		compileCmd = []string{"g++", "-std=c++11", "-o", p.Target, p.Source}
-	case "C++14":
-		compileCmd = []string{"g++", "-std=c++14", "-o", p.Target, p.Source}
-	case "Java":
-		filename := filepath.Base(p.Source)
-		if filename != "Main.java" {
-			return fmt.Errorf("invalid file name: %s", p.Source)
-		}
-		compileCmd = []string{"javac", "-d", tempDir, p.Source}
-	case "Python", "Python3", "Ruby", "PHP", "JavaScript", "Go":
-		p.Target = p.Source
-		return nil
-	case "Scala", "Haskel", "OCaml", "C#", "D", "Rust", "Kotlin":
-		return fmt.Errorf("not implemented language: %s", p.Language)
-	default:
-		return fmt.Errorf("unknown language: %s", p.Language)
-	}
-
-	target, err := EnsurePath(p.Target)
-	if err != nil {
-		return err
-	}
-	p.Target = target
-
-	cmd := exec.Command(compileCmd[0], compileCmd[1:]...)
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("compile error: %s", out)
-	}
-
-	return nil
-}
-
-func (p *CodeProcessor) exec(ctx context.Context, input string) (string, error) {
-	defer func() {
-		exist, _ := Exists(tempDir)
-		if exist {
-			os.RemoveAll(tempDir)
-		}
-	}()
-
-	var execCmd []string
-	switch p.Language {
-	case "C", "C++", "C++11", "C++14":
-		execCmd = []string{p.Target}
-	case "Java":
-		execCmd = []string{"java", "-cp", tempDir, "Main"}
-	case "Python":
-		execCmd = []string{"python2", p.Target}
-	case "Python3":
-		execCmd = []string{"python3", p.Target}
-	case "Ruby":
-		execCmd = []string{"ruby", p.Target}
-	case "PHP":
-		execCmd = []string{"php", p.Target}
-	case "JavaScript":
-		execCmd = []string{"node", p.Target}
-	case "Go":
-		execCmd = []string{"go", "run", p.Target}
-	case "Scala", "Haskel", "OCaml", "C#", "D", "Rust", "Kotlin":
-		return "", fmt.Errorf("not implemented language: %s", p.Language)
-	default:
-		return "", fmt.Errorf("unknown language: %s", p.Language)
-	}
-
-	cmd := exec.CommandContext(ctx, execCmd[0], execCmd[1:]...)
+	cmd = exec.CommandContext(ctx, c.execCmd[0], c.execCmd[1:]...)
 
 	if input != "" {
 		stdin, err := cmd.StdinPipe()
@@ -122,7 +162,7 @@ func (p *CodeProcessor) exec(ctx context.Context, input string) (string, error) 
 		stdin.Close()
 	}
 
-	out, err := cmd.Output()
+	out, err = cmd.Output()
 
 	if ctx.Err() == context.DeadlineExceeded {
 		return "", fmt.Errorf("execution timeout")
