@@ -30,8 +30,7 @@ Run your code with sample inputs and compare it with the correct outputs.
 $ aojtool run ALDS1_1_A main.c
 ```
 
-You can specify language with `-l` flag,
-defaults to your default programming language of AOJ.
+Programming language of the source code will be detected automatically.
 
 ### Submit Your Code
 
