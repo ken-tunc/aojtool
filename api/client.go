@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
@@ -199,7 +198,7 @@ func loadCookies() ([]*http.Cookie, error) {
 	}
 	var cookies []*http.Cookie
 
-	data, err := ioutil.ReadFile(cookiesCache)
+	data, err := util.ReadBytes(cookiesCache)
 	if err != nil {
 		return nil, err
 	}

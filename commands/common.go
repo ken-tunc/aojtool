@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -37,7 +36,7 @@ func maybeLoadUser() (*models.User, error) {
 
 	var user models.User
 
-	data, err := ioutil.ReadFile(userCache)
+	data, err := util.ReadBytes(userCache)
 	if err != nil {
 		return nil, err
 	}

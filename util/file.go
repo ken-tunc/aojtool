@@ -1,6 +1,7 @@
 package util
 
 import (
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -68,4 +69,8 @@ func WriteBytes(data []byte, path string) error {
 
 	_, err = file.Write(data)
 	return err
+}
+
+func ReadBytes(path string) ([]byte, error) {
+	return ioutil.ReadFile(path)
 }
