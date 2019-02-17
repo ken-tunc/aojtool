@@ -138,20 +138,32 @@ func NewCodeRunner(file string, timeout time.Duration) (*CodeRunner, error) {
 	}
 }
 
-func (c *CodeRunner) Run(input string) (string, error) {
-	defer os.RemoveAll(tempDir)
+func (c *CodeRunner) compile() error {
+	if c.compileCmd == nil {
+		return nil
+	}
 
 	cmd := exec.Command(c.compileCmd[0], c.compileCmd[1:]...)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return "", fmt.Errorf("compile error: %s", out)
+		return fmt.Errorf("compile error: %s", out)
+	} else {
+		return nil
+	}
+}
+
+func (c *CodeRunner) Run(input string) (string, error) {
+	defer os.RemoveAll(tempDir)
+
+	if err := c.compile(); err != nil {
+		return "", err
 	}
 
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 
-	cmd = exec.CommandContext(ctx, c.execCmd[0], c.execCmd[1:]...)
+	cmd := exec.CommandContext(ctx, c.execCmd[0], c.execCmd[1:]...)
 
 	if input != "" {
 		stdin, err := cmd.StdinPipe()
@@ -165,7 +177,7 @@ func (c *CodeRunner) Run(input string) (string, error) {
 		stdin.Close()
 	}
 
-	out, err = cmd.Output()
+	out, err := cmd.Output()
 
 	if ctx.Err() == context.DeadlineExceeded {
 		return "", fmt.Errorf("execution timeout")
