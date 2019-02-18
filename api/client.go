@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
-	"os"
 	"path/filepath"
 	"time"
 
@@ -136,35 +135,12 @@ func (c *Client) Cookies() []*http.Cookie {
 }
 
 func (c *Client) SaveCookies() error {
-	byteCookies, err := util.Serialize(c.Cookies())
-	if err != nil {
-		return err
-	}
-
-	err = util.WriteBytes(byteCookies, cookiesCache)
-	if err != nil {
-		return err
-	}
-
-	err = os.Chmod(cookiesCache, 0600)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return util.SaveData(cookiesCache, c.Cookies())
 }
 
 func (c *Client) RemoveCookies() error {
-	exist, err := util.Exists(cookiesCache)
-	if err != nil {
-		return err
-	}
+	return util.RemoveData(cookiesCache)
 
-	if exist {
-		return os.Remove(cookiesCache)
-	} else {
-		return nil
-	}
 }
 
 func newCookieJar(urls ...*url.URL) (*cookiejar.Jar, error) {
@@ -196,14 +172,10 @@ func loadCookies() ([]*http.Cookie, error) {
 	if !exist {
 		return nil, nil
 	}
+
 	var cookies []*http.Cookie
 
-	data, err := util.ReadBytes(cookiesCache)
-	if err != nil {
-		return nil, err
-	}
-
-	if err = util.Deserialize(data, &cookies); err != nil {
+	if err := util.LoadData(cookiesCache, &cookies); err != nil {
 		return nil, err
 	}
 

@@ -55,22 +55,11 @@ func HomeDir() string {
 	return dir
 }
 
-func WriteBytes(data []byte, path string) error {
-	absPath, err := EnsurePath(path)
+func ReadFile(path string) (string, error) {
+	byteContent, err := ioutil.ReadFile(path)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	file, err := os.Create(absPath)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	_, err = file.Write(data)
-	return err
-}
-
-func ReadBytes(path string) ([]byte, error) {
-	return ioutil.ReadFile(path)
+	return string(byteContent), nil
 }

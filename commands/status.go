@@ -30,11 +30,11 @@ var statusCmd = &cobra.Command{
 		}
 
 		if !loggedIn {
-			cmd.Println("Not logged in.")
+			cmd.Println("You need to login.")
 			return
 		}
 
-		user, err := maybeLoadUser()
+		user, err := loadUser()
 		if err != nil {
 			abort(err)
 		}

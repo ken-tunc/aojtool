@@ -3,8 +3,6 @@ package commands
 import (
 	"context"
 	"errors"
-	"fmt"
-	"io/ioutil"
 
 	"github.com/ken-tunc/aojtool/util"
 
@@ -47,13 +45,14 @@ var submitCmd = &cobra.Command{
 			abort(err)
 		}
 
-		var user *models.User
-
 		if !loggedIn {
-			abort(errors.New("not logged in"))
+			cmd.Println("You need to login.")
+			return
 		}
 
-		user, err = maybeLoadUser()
+		var user *models.User
+
+		user, err = loadUser()
 		if err != nil {
 			abort(err)
 		}
@@ -62,21 +61,11 @@ var submitCmd = &cobra.Command{
 			SubmitLanguage = user.DefaultProgrammingLanguage
 		}
 
-		exist, err := util.Exists(sourceFile)
+		sourceCode, err := util.ReadFile(sourceFile)
 		if err != nil {
 			abort(err)
 		}
 
-		if !exist {
-			abort(fmt.Errorf("source file %s doesn't exist", sourceFile))
-		}
-
-		byteSourceCode, err := ioutil.ReadFile(sourceFile)
-		if err != nil {
-			abort(err)
-		}
-
-		sourceCode := string(byteSourceCode)
 		ctx = context.Background()
 		err = client.Submit.Submit(ctx, problemId, SubmitLanguage, sourceCode)
 

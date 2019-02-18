@@ -11,51 +11,22 @@ import (
 var userCache = filepath.Join(util.CacheDir, "user")
 
 func saveUser(user models.User) error {
-	absPath, err := util.EnsurePath(userCache)
-	if err != nil {
-		return err
-	}
-
-	byteUser, err := util.Serialize(&user)
-	if err != nil {
-		return err
-	}
-
-	return util.WriteBytes(byteUser, absPath)
+	return util.SaveData(userCache, &user)
 }
 
-func maybeLoadUser() (*models.User, error) {
-	exist, err := util.Exists(userCache)
-	if err != nil {
-		return nil, err
-	}
-
-	if !exist {
-		return nil, nil
-	}
-
+func loadUser() (*models.User, error) {
 	var user models.User
 
-	data, err := util.ReadBytes(userCache)
+	err := util.LoadData(userCache, &user)
 	if err != nil {
 		return nil, err
 	}
 
-	err = util.Deserialize(data, &user)
-	return &user, err
+	return &user, nil
 }
 
 func removeUser() error {
-	exist, err := util.Exists(userCache)
-	if err != nil {
-		return err
-	}
-
-	if exist {
-		return os.Remove(userCache)
-	} else {
-		return nil
-	}
+	return util.RemoveData(userCache)
 }
 
 func abort(err error) {
