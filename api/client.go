@@ -95,7 +95,7 @@ func (c *Client) newRequest(ctx context.Context, endpoint, method, path string, 
 		return nil, err
 	}
 
-	req.WithContext(ctx)
+	req = req.WithContext(ctx)
 
 	if payload != nil {
 		req.Header.Set("Content-Type", "application/json")
