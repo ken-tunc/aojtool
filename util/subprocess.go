@@ -100,7 +100,7 @@ func NewCodeRunner(file string, timeout time.Duration) (*CodeRunner, error) {
 	case Python:
 		return &CodeRunner{
 			compileCmd: nil,
-			execCmd:    []string{"/usr/bin/env", "python", file},
+			execCmd:    []string{"python", file},
 			timeout:    timeout,
 		}, nil
 	case PHP:
