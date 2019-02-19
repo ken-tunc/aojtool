@@ -24,8 +24,8 @@ func Exists(path string) (bool, error) {
 	return true, err
 }
 
-func EnsurePath(path string) (absPath string, err error) {
-	absPath, err = filepath.Abs(path)
+func EnsurePath(path string) (string, error) {
+	absPath, err := filepath.Abs(path)
 	if err != nil {
 		return "", err
 	}
@@ -43,7 +43,7 @@ func EnsurePath(path string) (absPath string, err error) {
 		}
 	}
 
-	return
+	return absPath, nil
 }
 
 func HomeDir() string {
