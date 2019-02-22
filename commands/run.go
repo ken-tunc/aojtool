@@ -4,12 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"path/filepath"
 	"strings"
 	"time"
 
-	"github.com/sergi/go-diff/diffmatchpatch"
-
 	"github.com/ken-tunc/aojtool/api"
+	"github.com/ken-tunc/aojtool/models"
+
+	"github.com/sergi/go-diff/diffmatchpatch"
 
 	"github.com/ken-tunc/aojtool/util"
 
@@ -36,13 +38,7 @@ var runCmd = &cobra.Command{
 		var problemId = args[0]
 		var sourceFile = args[1]
 
-		client, err := api.NewClient()
-		if err != nil {
-			abort(err)
-		}
-
-		ctx := context.Background()
-		samples, err := client.Test.FindSamples(ctx, problemId)
+		samples, err := getSamples(problemId)
 		if err != nil {
 			abort(err)
 		}
@@ -77,4 +73,59 @@ var runCmd = &cobra.Command{
 func init() {
 	runCmd.Flags().IntVarP(&TimeOutSec, "timeout", "t", 60, "execution timeout seconds")
 	rootCmd.AddCommand(runCmd)
+}
+
+func getSamples(problemId string) ([]models.TestCase, error) {
+	var samples []models.TestCase
+
+	cachePath := getSamplesSavePath(problemId)
+	exist, err := util.Exists(cachePath)
+	if err != nil {
+		return nil, err
+	}
+
+	if exist {
+		samples, err = loadSample(problemId)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		client, err := api.NewClient()
+		if err != nil {
+			return nil, err
+		}
+
+		ctx := context.Background()
+		samples, err = client.Test.FindSamples(ctx, problemId)
+		if err != nil {
+			return nil, err
+		}
+
+		err = saveSamples(samples)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return samples, nil
+}
+
+func getSamplesSavePath(problemId string) string {
+	return filepath.Join(sampleCache, problemId)
+}
+
+func saveSamples(samples []models.TestCase) error {
+	path := getSamplesSavePath(samples[0].ProblemId)
+	return util.SaveData(path, &samples)
+}
+
+func loadSample(problemId string) ([]models.TestCase, error) {
+	var samples []models.TestCase
+
+	path := getSamplesSavePath(problemId)
+	if err := util.LoadData(path, &samples); err != nil {
+		return nil, err
+	}
+
+	return samples, nil
 }

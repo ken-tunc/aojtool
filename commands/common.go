@@ -8,7 +8,15 @@ import (
 	"github.com/ken-tunc/aojtool/util"
 )
 
-var userCache = filepath.Join(util.CacheDir, "user")
+var (
+	userCache   = filepath.Join(util.CacheDir, "user")
+	sampleCache = filepath.Join(util.CacheDir, "samples")
+)
+
+func abort(err error) {
+	rootCmd.Println(err)
+	os.Exit(1)
+}
 
 func saveUser(user models.User) error {
 	return util.SaveData(userCache, &user)
@@ -27,9 +35,4 @@ func loadUser() (*models.User, error) {
 
 func removeUser() error {
 	return util.RemoveData(userCache)
-}
-
-func abort(err error) {
-	rootCmd.Println(err)
-	os.Exit(1)
 }
