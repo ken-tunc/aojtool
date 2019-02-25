@@ -40,7 +40,6 @@ var statusCmd = &cobra.Command{
 		if err != nil {
 			abort(err)
 		}
-		cmd.Println("[AOJ user status]")
 		printUser(cmd.OutOrStderr(), user)
 
 		if Size < 1 {
