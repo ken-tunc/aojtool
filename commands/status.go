@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"text/tabwriter"
+	"strconv"
+
+	"github.com/olekukonko/tablewriter"
 
 	"github.com/ken-tunc/aojtool/api"
 	"github.com/ken-tunc/aojtool/models"
@@ -51,13 +53,8 @@ var statusCmd = &cobra.Command{
 			abort(err)
 		}
 
-		for i, record := range records {
-			cmd.Println()
-			if i == 0 {
-				cmd.Printf("[Recent %d submission status]\n", Size)
-			}
-			printSubmissionRecord(cmd.OutOrStderr(), record)
-		}
+		cmd.Println()
+		printSubmissionRecords(cmd.OutOrStderr(), records)
 	},
 }
 
@@ -67,23 +64,39 @@ func init() {
 }
 
 func printUser(w io.Writer, user *models.User) {
-	tabWriter := tabwriter.NewWriter(w, 0, 0, 1, ' ', tabwriter.TabIndent)
-	fmt.Fprintf(tabWriter, "User ID\t%s\n", user.ID)
-	fmt.Fprintf(tabWriter, "Last Submit Date\t%s\n", util.TimeFromUnix(user.LastSubmitDate))
-	fmt.Fprintf(tabWriter, "Default Programming SubmitLanguage\t%s\n", user.DefaultProgrammingLanguage)
-	tabWriter.Flush()
+	status := []string{
+		user.ID,
+		util.TimeFromUnix(user.LastSubmitDate).Format("2006-01-02 15:04"),
+		user.DefaultProgrammingLanguage,
+	}
+
+	table := tablewriter.NewWriter(w)
+	table.SetCaption(true, "AOJ user status.")
+	table.SetHeader([]string{"User ID", "Last Submit Date", "Default Language"})
+	table.Append(status)
+	table.Render()
 }
 
-func printSubmissionRecord(out io.Writer, record models.SubmissionRecord) {
-	w := tabwriter.NewWriter(out, 0, 0, 1, ' ', tabwriter.TabIndent)
-	fmt.Fprintf(w, "Judge ID\t%d\n", record.JudgeId)
-	fmt.Fprintf(w, "Problem ID\t%s\n", record.ProblemId)
-	fmt.Fprintf(w, "Submission Date\t%s\n", util.TimeFromUnix(record.SubmissionDate))
-	fmt.Fprintf(w, "SubmitLanguage\t%s\n", record.Language)
-	fmt.Fprintf(w, "Status\t%s\n", record.Status.String())
-	fmt.Fprintf(w, "Score\t%d\n", record.Score)
-	if record.Accuracy != nil {
-		fmt.Fprintf(w, "Accuracy\t%s\n", *record.Accuracy)
+func printSubmissionRecords(w io.Writer, records []models.SubmissionRecord) {
+	var data [][]string
+	for _, record := range records {
+		data = append(data, []string{
+			strconv.Itoa(record.JudgeId),
+			record.ProblemId,
+			util.TimeFromUnix(record.SubmissionDate).Format("2006-01-02 15:04"),
+			record.Language,
+			record.Status.String(),
+			strconv.Itoa(record.Score),
+		})
 	}
-	w.Flush()
+
+	table := tablewriter.NewWriter(w)
+	table.SetCaption(true, fmt.Sprintf("Recent %d submission records.", len(records)))
+	table.SetHeader([]string{"Judge ID", "Problem ID", "Submission Date", "Language", "Status", "Score"})
+
+	for _, v := range data {
+		table.Append(v)
+	}
+
+	table.Render()
 }
