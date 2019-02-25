@@ -51,8 +51,7 @@ var loginCmd = &cobra.Command{
 			abort(err)
 		}
 
-		err = saveUser(*user)
-		if err != nil {
+		if err = saveUser(*user); err != nil {
 			abort(err)
 		}
 	},

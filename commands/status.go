@@ -18,7 +18,7 @@ var Size int
 
 var statusCmd = &cobra.Command{
 	Use:   "status",
-	Short: "Print user and recent submission status.",
+	Short: "Print user and recent submission records.",
 	Run: func(cmd *cobra.Command, args []string) {
 		client, err := api.NewClient()
 		if err != nil {

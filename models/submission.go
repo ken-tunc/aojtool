@@ -3,7 +3,7 @@ package models
 type SubmissionStatus int
 
 const (
-	CompileError = iota
+	CompileError SubmissionStatus = iota
 	WrongAnswer
 	TimeLimit
 	MemoryLimit

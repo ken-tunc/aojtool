@@ -6,8 +6,6 @@ import (
 
 	"github.com/ken-tunc/aojtool/util"
 
-	"github.com/ken-tunc/aojtool/models"
-
 	"github.com/ken-tunc/aojtool/api"
 
 	"github.com/spf13/cobra"
@@ -50,9 +48,7 @@ var submitCmd = &cobra.Command{
 			return
 		}
 
-		var user *models.User
-
-		user, err = loadUser()
+		user, err := loadUser()
 		if err != nil {
 			abort(err)
 		}
@@ -67,9 +63,7 @@ var submitCmd = &cobra.Command{
 		}
 
 		ctx = context.Background()
-		err = client.Submit.Submit(ctx, problemId, SubmitLanguage, sourceCode)
-
-		if err != nil {
+		if err = client.Submit.Submit(ctx, problemId, SubmitLanguage, sourceCode); err != nil {
 			abort(err)
 		}
 	},

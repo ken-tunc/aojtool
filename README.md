@@ -4,7 +4,7 @@ A CLI automation tool for [Aizu Online Judge](http://judge.u-aizu.ac.jp/onlineju
 
 - Run your code with sample inputs and compare with the correct outputs
 - Submit your code to AOJ
-- Enable you to check your profile and recent submission status
+- Enable you to check your profile and recent submission records
 
 ## Installation
 
@@ -44,7 +44,7 @@ defaults to your default programming language of AOJ.
 
 ### Check Status
 
-Check your profile and recent submission status.
+Check your profile and recent submission records.
 ```console
 $ aojtool status
 ```
