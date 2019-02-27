@@ -14,7 +14,7 @@ import (
 var SubmitLanguage string
 
 var submitCmd = &cobra.Command{
-	Use:   "submit [-l language] [problem-id] [source-file]",
+	Use:   "submit [problem-id] [source-file]",
 	Short: "Submit a source code.",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 2 {

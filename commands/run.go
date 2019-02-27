@@ -23,7 +23,7 @@ var (
 )
 
 var runCmd = &cobra.Command{
-	Use:   "run [-t timeout] [problem-id] [source-file]",
+	Use:   "run [problem-id] [source-file]",
 	Short: "Run program with sample inputs.",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 2 {
