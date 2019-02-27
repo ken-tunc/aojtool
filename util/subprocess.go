@@ -182,5 +182,9 @@ func (c *CodeRunner) Run(input string) (string, error) {
 		return "", fmt.Errorf("execution timeout")
 	}
 
-	return string(out), err
+	if err != nil {
+		return "", err
+	}
+
+	return string(out), nil
 }
