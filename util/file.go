@@ -63,3 +63,19 @@ func ReadFile(path string) (string, error) {
 
 	return string(byteContent), nil
 }
+
+func RemoveContents(dirname string) error {
+	dir, err := ioutil.ReadDir(dirname)
+	if err != nil {
+		return err
+	}
+
+	for _, subDir := range dir {
+		err = os.RemoveAll(filepath.Join(dirname, subDir.Name()))
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}

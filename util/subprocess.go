@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
@@ -153,7 +152,7 @@ func (c *CodeRunner) compile() error {
 }
 
 func (c *CodeRunner) Run(input string) (string, error) {
-	defer os.RemoveAll(tempDir)
+	defer RemoveContents(tempDir)
 
 	if err := c.compile(); err != nil {
 		return "", err
