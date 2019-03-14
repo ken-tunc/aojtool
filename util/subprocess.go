@@ -176,14 +176,14 @@ func (c *CodeRunner) Run(input string) (string, error) {
 		stdin.Close()
 	}
 
-	out, err := cmd.Output()
+	out, err := cmd.CombinedOutput()
 
 	if ctx.Err() == context.DeadlineExceeded {
 		return "", fmt.Errorf("execution timeout")
 	}
 
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("execution error\n%s", out)
 	}
 
 	return string(out), nil
